@@ -17,7 +17,9 @@
     "ext": "ts, js"
   },
   "scripts": {
-    "dev": "nodemon",
+    "dev": "env-cmd -f .env.dev --use-shell \"nodemon\"",
+    "dev:qa": "env-cmd -f .env.qa --use-shell \"nodemon\"",
+    "dev:prod": "env-cmd -f .env.prod --use-shell \"nodemon\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
@@ -32,7 +34,9 @@
     "@types/jsonwebtoken": "^8.5.6",
     "@types/mongoose": "^5.11.97",
     "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "ejs": "^3.1.6",
+    "env-cmd": "^10.1.0",
     "express": "^4.17.1",
     "http-errors": "^1.8.1",
     "jsonwebtoken": "^8.5.1",
@@ -43,6 +47,7 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/http-errors": "^1.8.1"
   }
 }

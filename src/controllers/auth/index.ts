@@ -15,8 +15,8 @@ export class AuthController extends Controller {
     @Post('/login')
     public async login(req: Request<{}, {}, ILoginUserBody>, res: Response, next: any): Promise<void> {
         try {
-            const { username, password } = req.body;
-            const foundUser = await UserSchema.findOne({ username });
+            const { email, password } = req.body;
+            const foundUser = await UserSchema.findOne({ email });
 
             if (!foundUser) {
                 throw new createError.Forbidden('Username or password is not valid.');
@@ -33,10 +33,12 @@ export class AuthController extends Controller {
                 id: foundUser._id
             }
 
+            const { password: userPassword, ...userData } = foundUser;
+
             const token = jwt.sign(tokenContent, 'tokens', { expiresIn: '1d' });
             const refreshToken = jwt.sign(tokenContent, 'refreshTokens', { expiresIn: '30d' });
 
-            res.json({ success: true, data: { token, refreshToken, userData: foundUser } });
+            res.json({ success: true, data: { token, refreshToken, userData } });
         } catch (error) {
             next(error);
         }
@@ -53,7 +55,7 @@ export class AuthController extends Controller {
                 throw new createError.BadRequest('Firstname and lastname not be empty');
             }
             if (!Validation.emailValidate(email)) {
-                throw new createError.BadRequest('E-mail Now Valid.')
+                throw new createError.BadRequest('E-mail Not Valid.')
             }
             if (!Validation.passwordValidate(password)) {
                 throw new createError.BadRequest('Password should contain atleast one number and one special character')
@@ -110,7 +112,18 @@ export class AuthController extends Controller {
 
     @Get('/forgot-password/static-page/:token')
     public async renderForgorPassowrdPage(req: Request, res: Response, next: any): Promise<void> {
-        console.log('adasdasd');
         res.render('forgotPassword');
+    }
+
+    @Get('/user-content/:username')
+    public async getUserContent(req: Request, res: Response, next: any): Promise<void> {
+        const { username } = req.params;
+        const foundUser = await UserSchema.findOne({ username });
+        if (foundUser) {
+            const { password: userPassword, ...userData } = foundUser;
+            res.json({ succes: true, data: { userData } });
+        }
+
+        res.status(404).send();
     }
 }

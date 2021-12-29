@@ -17,7 +17,7 @@ class ExpressRegisterProccess {
         this.registerRoutes(controllers);
         this.registerMiddlewares(endOfMiddlewares);
 
-        this.app.listen('8000', () => {
+        this.app.listen('8080', () => {
             console.log('listining 8080 ports');
         });
     }

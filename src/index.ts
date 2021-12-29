@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import cors from 'cors';
 
 import Connection from '@db/connection';
 
@@ -22,7 +23,8 @@ Connection().then(
                     PostController
                 ],
                 initialMiddlewares: [
-                    express.json()
+                    express.json(),
+                    cors()
                 ],
                 endOfMiddlewares: [
                     CustomMiddlewares.errorHandler

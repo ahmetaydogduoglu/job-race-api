@@ -11,7 +11,7 @@ export interface IUser {
 }
 
 export interface ILoginUserBody {
-    username: string;
+    email: string;
     password: string;
 }
 export interface IUserRegisterBody {
