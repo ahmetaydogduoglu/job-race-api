@@ -9,6 +9,7 @@ import { ILoginUserBody, UserSchema, IUserRegisterBody } from '@db/schemas/user'
 import { Validation } from '@utils/validation';
 import Controller from '@core/registerProccess/controller';
 import { UserRoles } from 'constant/userRoles';
+import { CustomMiddlewares } from '@utils/customMiddlewares';
 
 @Route('/auth')
 export class AuthController extends Controller {
@@ -33,12 +34,10 @@ export class AuthController extends Controller {
                 id: foundUser._id
             }
 
-            const { password: userPassword, ...userData } = foundUser;
+            const token = jwt.sign(tokenContent, 'tokens', { expiresIn: '30d' });
+            const refreshToken = jwt.sign(tokenContent, 'refreshTokens', { expiresIn: '60d' });
 
-            const token = jwt.sign(tokenContent, 'tokens', { expiresIn: '1d' });
-            const refreshToken = jwt.sign(tokenContent, 'refreshTokens', { expiresIn: '30d' });
-
-            res.json({ success: true, data: { token, refreshToken, userData } });
+            res.json({ success: true, data: { token, refreshToken, userData: foundUser } });
         } catch (error) {
             next(error);
         }
@@ -80,50 +79,27 @@ export class AuthController extends Controller {
         }
     }
 
-    @Post('/validate')
-    public validate(req: Request, res: Response, next: any): void {
-        try {
-            const { refreshtoken: refreshToken, token } = req.headers;
-
-            if (token && refreshToken) {
-                const isValid = jwt.verify(token.toString(), 'tokens');
-
-                if (!isValid) {
-                    const isValidRefrehToken = jwt.verify(refreshToken.toString(), 'refreshTokens');
-
-                    if (isValidRefrehToken) {
-                        const newToken = jwt.sign(isValidRefrehToken, 'tokens', { expiresIn: '1d' });
-                        const newRefreshToken = jwt.sign(isValidRefrehToken, 'refreshTokens', { expiresIn: '30d' });
-
-                        res.json({ success: true, data: { token: newToken, refreshToken: newRefreshToken } });
-                    } else {
-                        throw new createError.Unauthorized();
-                    }
-                }
-
-                res.json({ success: true, data: { token, refreshToken } });
-            }
-
-            throw new createError.Unauthorized();
-        } catch (error) {
-            next(error);
-        }
-    }
-
     @Get('/forgot-password/static-page/:token')
     public async renderForgorPassowrdPage(req: Request, res: Response, next: any): Promise<void> {
         res.render('forgotPassword');
     }
 
-    @Get('/user-content/:username')
+    @Get('/user-content', CustomMiddlewares.authHandler)
     public async getUserContent(req: Request, res: Response, next: any): Promise<void> {
-        const { username } = req.params;
-        const foundUser = await UserSchema.findOne({ username });
-        if (foundUser) {
-            const { password: userPassword, ...userData } = foundUser;
-            res.json({ succes: true, data: { userData } });
-        }
+        const { token } = req.headers;
 
+        if (token) {
+            const user = jwt.decode(token.toString())
+
+            if (typeof user === 'object' && user?.id) {
+                const foundUser = await UserSchema.findById(user?.id);
+
+                if (foundUser) {
+                    res.json({ succes: true, data: { userData: foundUser } });
+                }
+            }
+            res.status(404).send();
+        }
         res.status(404).send();
     }
 }

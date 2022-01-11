@@ -5,7 +5,7 @@ import cors from 'cors';
 import Connection from '@db/connection';
 
 import { AuthController } from '@controllers/auth';
-import { PostController } from '@controllers/posts';
+import { PostController } from '@controllers/feeds';
 
 import { expressRegisterProccess } from '@core/registerProccess/app';
 

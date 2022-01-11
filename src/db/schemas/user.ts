@@ -8,6 +8,7 @@ export interface IUser {
     password: string;
     avatar: string;
     role: string;
+    location: string;
 }
 
 export interface ILoginUserBody {
@@ -31,6 +32,7 @@ const schema = new Mongoose.Schema<IUser>({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, required: true },
+    location: { type: String, required: true },
 });
 
 export const UserSchema = Mongoose.model('users', schema);
